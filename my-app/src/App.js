@@ -1,12 +1,11 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
-import Camera from "./components/camera.js";
+import JudgePage from "./components/JudgePage.js";
 
 function App() {
   return (
     <div className="App">
-      <Camera />
+      <JudgePage />
     </div>
   );
 }

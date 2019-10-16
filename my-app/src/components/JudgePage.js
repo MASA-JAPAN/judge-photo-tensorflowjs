@@ -1,12 +1,37 @@
 import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
 import * as tf from "@tensorflow/tfjs";
 import * as mobilenet from "@tensorflow-models/mobilenet";
 
-export default class CameraFunction extends React.Component {
-  render() {
-    return (
-      <div>
-        <div id="console"></div>
+const useStyles = makeStyles(theme => ({
+  root: {
+    padding: theme.spacing(3, 2)
+  },
+  progress: {
+    margin: theme.spacing(2)
+  },
+  judgeVideo: {
+    display: "none"
+  }
+}));
+
+export default function JudgePage() {
+  const classes = useStyles();
+
+  return (
+    <div className={classes.root}>
+      <Paper className={classes.root}>
+        <Typography variant="h5" component="h3">
+          <div id="console">I am comming...</div>
+        </Typography>
+      </Paper>
+      <div id="progress">
+        <CircularProgress className={classes.progress} />
+      </div>
+      <div className={classes.judgeVideo} id="video">
         <video
           autoPlay
           playsInline
@@ -16,8 +41,8 @@ export default class CameraFunction extends React.Component {
           height="100%"
         ></video>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 window.onload = function() {
@@ -32,13 +57,14 @@ window.onload = function() {
     console.log("Successfully loaded model");
 
     await setupWebcam();
+    hideProgress();
+    showVideo();
     while (true) {
       const result = await net.classify(webcamElement);
 
-      document.getElementById("console").innerText = `
-      prediction: ${result[0].className}\n
-      probability: ${result[0].probability}
-    `;
+      document.getElementById("console").innerText = `This is ${
+        result[0].className.split(",")[0]
+      }`;
 
       // Give some breathing room by waiting for the next animation frame to
       // fire.
@@ -71,5 +97,15 @@ window.onload = function() {
       }
     });
   }
+  const hideProgress = () => {
+    let progress = document.getElementById("progress");
+    progress.style.display = "none";
+    console.log("aaa");
+  };
+  const showVideo = () => {
+    let video = document.getElementById("video");
+    video.style.display = "block";
+    console.log("aaa");
+  };
   app();
 };
