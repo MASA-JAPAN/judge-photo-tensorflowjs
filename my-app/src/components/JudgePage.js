@@ -14,7 +14,8 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(2)
   },
   judgeVideo: {
-    display: "none"
+    display: "none",
+    padding: "10px"
   }
 }));
 
@@ -50,62 +51,56 @@ window.onload = function() {
   let net;
 
   async function app() {
-    console.log("Loading mobilenet..");
+    try {
+      // Load the model.
+      net = await mobilenet.load();
+      await setupWebcam();
+      hideProgress();
+      showVideo();
 
-    // Load the model.
-    net = await mobilenet.load();
-    console.log("Successfully loaded model");
+      while (true) {
+        const result = await net.classify(webcamElement);
 
-    await setupWebcam();
-    hideProgress();
-    showVideo();
-    while (true) {
-      const result = await net.classify(webcamElement);
+        document.getElementById("console").innerText = `This is ${
+          result[0].className.split(",")[0]
+        }`;
 
-      document.getElementById("console").innerText = `This is ${
-        result[0].className.split(",")[0]
-      }`;
-
-      // Give some breathing room by waiting for the next animation frame to
-      // fire.
-      await tf.nextFrame();
+        // Give some breathing room by waiting for the next animation frame to
+        // fire.
+        await tf.nextFrame();
+      }
+    } catch (e) {
+      alert(e.message);
     }
   }
   async function setupWebcam() {
     return new Promise((resolve, reject) => {
-      const navigatorAny = navigator;
-      navigator.getUserMedia =
-        navigator.getUserMedia ||
-        navigatorAny.webkitGetUserMedia ||
-        navigatorAny.mozGetUserMedia ||
-        navigatorAny.msGetUserMedia;
-      if (navigator.getUserMedia) {
-        navigator.getUserMedia(
-          { video: true },
-          stream => {
-            webcamElement.srcObject = stream;
-            webcamElement.addEventListener(
-              "loadeddata",
-              () => resolve(),
-              false
-            );
-          },
-          error => reject()
-        );
-      } else {
-        reject();
+      const medias = {
+        audio: false,
+        video: {
+          facingMode: "environment"
+        }
+      };
+      const promise = navigator.mediaDevices.getUserMedia(medias);
+      promise.then(successCallback).catch(errorCallback);
+      function successCallback(stream) {
+        webcamElement.srcObject = stream;
+        webcamElement.oncanplay = function() {
+          resolve();
+        };
+      }
+      function errorCallback(err) {
+        alert(err);
       }
     });
   }
   const hideProgress = () => {
     let progress = document.getElementById("progress");
     progress.style.display = "none";
-    console.log("aaa");
   };
   const showVideo = () => {
     let video = document.getElementById("video");
     video.style.display = "block";
-    console.log("aaa");
   };
   app();
 };
