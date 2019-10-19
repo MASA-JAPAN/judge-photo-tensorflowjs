@@ -5,6 +5,10 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import * as tf from "@tensorflow/tfjs";
 import * as mobilenet from "@tensorflow-models/mobilenet";
+import Fab from "@material-ui/core/Fab";
+import StopIcon from "@material-ui/icons/Stop";
+import KeyboardReturnIcon from "@material-ui/icons/KeyboardReturn";
+import GetAppIcon from "@material-ui/icons/GetApp";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -16,6 +20,22 @@ const useStyles = makeStyles(theme => ({
   judgeVideo: {
     display: "none",
     padding: "10px"
+  },
+  fab1: {
+    position: "absolute",
+    color: "red",
+    bottom: theme.spacing(2),
+    right: "42vw"
+  },
+  fab2: {
+    position: "absolute",
+    bottom: theme.spacing(2),
+    left: theme.spacing(2)
+  },
+  fab3: {
+    position: "absolute",
+    bottom: theme.spacing(2),
+    right: theme.spacing(2)
   }
 }));
 
@@ -42,11 +62,29 @@ export default function JudgePage() {
           height="100%"
         ></video>
       </div>
+      <div>
+        <Fab aria-label="Stop" className={classes.fab1}>
+          <StopIcon />
+        </Fab>
+        <Fab aria-label="KeyboardReturn" className={classes.fab2}>
+          <KeyboardReturnIcon />
+        </Fab>
+        <Fab aria-label="GetApp" className={classes.fab3}>
+          <GetAppIcon />
+        </Fab>
+      </div>
     </div>
   );
 }
 
 window.onload = function() {
+  document.addEventListener(
+    "touchmove",
+    function(e) {
+      e.preventDefault();
+    },
+    { passive: false }
+  );
   const webcamElement = document.getElementById("webcam");
   let net;
 
