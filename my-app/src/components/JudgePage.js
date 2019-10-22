@@ -9,6 +9,10 @@ import Fab from "@material-ui/core/Fab";
 import StopIcon from "@material-ui/icons/Stop";
 import KeyboardReturnIcon from "@material-ui/icons/KeyboardReturn";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import firebase from "firebase";
+import { firebaseConfig } from "../config/config.js";
+
+firebase.initializeApp(firebaseConfig);
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -38,6 +42,9 @@ const useStyles = makeStyles(theme => ({
     position: "absolute",
     bottom: theme.spacing(2),
     right: theme.spacing(2),
+    display: "none"
+  },
+  canvas: {
     display: "none"
   }
 }));
@@ -144,6 +151,27 @@ export default function JudgePage() {
     downloadButton.style.display = "none";
   };
 
+  const handleUpload = () => {
+    var canvas = document.getElementById("canvas");
+    var video = document.getElementById("webcam");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas
+      .getContext("2d")
+      .drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+    // Create a root reference
+    var storageRef = firebase.storage().ref();
+
+    // Create a reference to 'images/mountains.jpg'
+    var mountainImagesRef = storageRef.child("images/test.jpg");
+
+    mountainImagesRef
+      .putString(canvas.toDataURL("image/png"), "data_url")
+      .then(function(snapshot) {
+        console.log("Uploaded a data_url string!");
+      });
+  };
+
   return (
     <div className={classes.root}>
       <Paper className={classes.root}>
@@ -186,10 +214,12 @@ export default function JudgePage() {
           color="primary"
           aria-label="GetApp"
           className={classes.fab3}
+          onClick={() => handleUpload()}
           id="downloadButton"
         >
           <CloudUploadIcon />
         </Fab>
+        <canvas id="canvas" className={classes.canvas}></canvas>
       </div>
     </div>
   );
