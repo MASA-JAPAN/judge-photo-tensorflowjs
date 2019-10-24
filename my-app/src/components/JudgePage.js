@@ -10,9 +10,6 @@ import StopIcon from "@material-ui/icons/Stop";
 import KeyboardReturnIcon from "@material-ui/icons/KeyboardReturn";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import firebase from "firebase";
-import { firebaseConfig } from "../config/config.js";
-
-firebase.initializeApp(firebaseConfig);
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -159,16 +156,26 @@ export default function JudgePage() {
     canvas
       .getContext("2d")
       .drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-    // Create a root reference
-    var storageRef = firebase.storage().ref();
 
-    // Create a reference to 'images/mountains.jpg'
-    var mountainImagesRef = storageRef.child("images/test.jpg");
-
-    mountainImagesRef
-      .putString(canvas.toDataURL("image/png"), "data_url")
-      .then(function(snapshot) {
-        console.log("Uploaded a data_url string!");
+    var db = firebase.firestore();
+    db.collection("images")
+      .add({
+        dataUrl: canvas.toDataURL("image/png"),
+        createdDate: Date.now()
+      })
+      .then(function(docRef) {
+        var storageRef = firebase.storage().ref();
+        var mountainImagesRef = storageRef.child(
+          "images/" + docRef.id + ".jpg"
+        );
+        mountainImagesRef
+          .putString(canvas.toDataURL("image/png"), "data_url")
+          .then(function(snapshot) {
+            console.log("Uploaded a data_url string!");
+          });
+      })
+      .catch(function(error) {
+        console.error("Error adding document: ", error);
       });
   };
 

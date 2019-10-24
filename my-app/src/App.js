@@ -1,6 +1,11 @@
 import React from "react";
 import "./App.css";
 import JudgePage from "./components/JudgePage.js";
+import JudgedListPage from "./components/JudgedListPage.js";
+import firebase from "firebase";
+import { firebaseConfig } from "./config/config.js";
+
+firebase.initializeApp(firebaseConfig);
 
 function App() {
   return (
