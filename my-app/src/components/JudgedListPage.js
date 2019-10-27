@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -8,7 +8,24 @@ import useScrollTrigger from "@material-ui/core/useScrollTrigger";
 import Box from "@material-ui/core/Box";
 import Container from "@material-ui/core/Container";
 import Slide from "@material-ui/core/Slide";
+import { makeStyles } from "@material-ui/core/styles";
+import GridList from "@material-ui/core/GridList";
+import GridListTile from "@material-ui/core/GridListTile";
 import firebase from "firebase";
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+    overflow: "hidden",
+    backgroundColor: theme.palette.background.paper
+  },
+  gridList: {
+    width: 500,
+    height: 450
+  }
+}));
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -33,24 +50,33 @@ HideOnScroll.propTypes = {
   window: PropTypes.func
 };
 
-export default function JudgedList(props) {
-  // Create a reference with an initial file path and name
-  var storage = firebase.storage();
-  var pathReference = storage.ref();
-  pathReference
-    .child("images/test.jpg")
-    .getDownloadURL()
-    .then(function(url) {
-      console.log(url);
+let loaded = false;
 
-      // Or inserted into an <img> element:
-      var img = document.getElementById("myimg");
-      img.src = url;
-    })
-    .catch(function(error) {
-      // Handle any errors
-      console.log("a");
-    });
+export default function JudgedList(props) {
+  const [imgUrls, setImgUrls] = useState([]);
+  const classes = useStyles();
+  // Create a reference to the cities collection
+  let imageUrls = [];
+  var db = firebase.firestore();
+
+  if (loaded == false) {
+    var imagesRef = db
+      .collection("images")
+      .get()
+      .then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+          // doc.data() is never undefined for query doc snapshots
+          imageUrls.unshift(doc.data().dataUrl);
+        });
+        setImgUrls(imageUrls);
+      })
+      .catch(function(error) {
+        console.log("Error getting documents: ", error);
+      });
+
+    loaded = true;
+  }
+
   return (
     <React.Fragment>
       <CssBaseline />
@@ -62,7 +88,13 @@ export default function JudgedList(props) {
         </AppBar>
       </HideOnScroll>
       <Toolbar />
-      <img id="myimg"></img>
+      <GridList cellHeight={160} className={classes.gridList} cols={3}>
+        {imgUrls.map(tile => (
+          <GridListTile key={tile} cols={2}>
+            <img src={tile} />
+          </GridListTile>
+        ))}
+      </GridList>
     </React.Fragment>
   );
 }
