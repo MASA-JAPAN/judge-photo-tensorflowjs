@@ -8,8 +8,6 @@ import * as mobilenet from "@tensorflow-models/mobilenet";
 import Fab from "@material-ui/core/Fab";
 import StopIcon from "@material-ui/icons/Stop";
 import KeyboardReturnIcon from "@material-ui/icons/KeyboardReturn";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import firebase from "firebase";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -22,24 +20,18 @@ const useStyles = makeStyles(theme => ({
     display: "none",
     padding: "10px"
   },
-  fab1: {
-    position: "absolute",
-    color: "red",
-    bottom: theme.spacing(2),
-    right: "42vw",
-    display: "none"
-  },
-  fab2: {
+  returnButton: {
     position: "absolute",
     bottom: theme.spacing(2),
     left: theme.spacing(2),
     display: "none"
   },
-  fab3: {
+  stopButton: {
     position: "absolute",
     bottom: theme.spacing(2),
     right: theme.spacing(2),
-    display: "none"
+    display: "none",
+    color: "red"
   },
   canvas: {
     display: "none"
@@ -129,9 +121,6 @@ export default function JudgePage() {
 
     let returnButton = document.getElementById("returnButton");
     returnButton.style.display = "inline-flex";
-
-    let downloadButton = document.getElementById("downloadButton");
-    downloadButton.style.display = "inline-flex";
   };
 
   const handleClickReturn = () => {
@@ -143,47 +132,13 @@ export default function JudgePage() {
 
     let returnButton = document.getElementById("returnButton");
     returnButton.style.display = "none";
-
-    let downloadButton = document.getElementById("downloadButton");
-    downloadButton.style.display = "none";
-  };
-
-  const handleUpload = () => {
-    var canvas = document.getElementById("canvas");
-    var video = document.getElementById("webcam");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas
-      .getContext("2d")
-      .drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-
-    var db = firebase.firestore();
-    db.collection("images")
-      .add({
-        dataUrl: canvas.toDataURL("image/png"),
-        createdDate: Date.now()
-      })
-      .then(function(docRef) {
-        var storageRef = firebase.storage().ref();
-        var mountainImagesRef = storageRef.child(
-          "images/" + docRef.id + ".jpg"
-        );
-        mountainImagesRef
-          .putString(canvas.toDataURL("image/png"), "data_url")
-          .then(function(snapshot) {
-            console.log("Uploaded a data_url string!");
-          });
-      })
-      .catch(function(error) {
-        console.error("Error adding document: ", error);
-      });
   };
 
   return (
     <div className={classes.root}>
       <Paper className={classes.root}>
         <Typography variant="h5" component="h3">
-          <div id="console">I am comming...</div>
+          <div id="console">Now loading...</div>
         </Typography>
       </Paper>
       <div id="progress">
@@ -202,7 +157,7 @@ export default function JudgePage() {
       <div>
         <Fab
           aria-label="Stop"
-          className={classes.fab1}
+          className={classes.stopButton}
           onClick={() => handleClickStop()}
           id="stopButton"
         >
@@ -211,20 +166,11 @@ export default function JudgePage() {
         <Fab
           color="secondary"
           aria-label="KeyboardReturn"
-          className={classes.fab2}
+          className={classes.returnButton}
           onClick={() => handleClickReturn()}
           id="returnButton"
         >
           <KeyboardReturnIcon />
-        </Fab>
-        <Fab
-          color="primary"
-          aria-label="GetApp"
-          className={classes.fab3}
-          onClick={() => handleUpload()}
-          id="downloadButton"
-        >
-          <CloudUploadIcon />
         </Fab>
         <canvas id="canvas" className={classes.canvas}></canvas>
       </div>
